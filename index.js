@@ -166,7 +166,9 @@ const cooldowns = new Map();
             try {
                 await command.run(client, message, args);
             } catch (error) {
-                logger.error(`Error executing message command ${commandName}:`, error);
+                logger.error(`Error executing message command ${commandName}:`);
+                console.log(error)
+                logger.error(error);
                 message.channel.createMessage("There was an error executing that command.");
             }
         }
