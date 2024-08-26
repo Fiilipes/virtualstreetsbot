@@ -2,7 +2,9 @@ const { execFile } = require('child_process');
 
 module.exports = (lat, lng) => {
     return new Promise((resolve, reject) => {
-        const command = 'C:\\Users\\jarol\\PycharmProjects\\streetlevelproject\\.venv\\Scripts\\python.exe';
+        const isHosting = process.env.HOSTING_ENABLED === 'true'; // Set this environment variable on your hosting
+        const command = isHosting ?
+                process.env.PYTHON_PATH : 'C:\\Users\\jarol\\PycharmProjects\\streetlevelproject\\.venv\\Scripts\\python.exe';
         const args = ['functions/find_panorama.py', lat, lng];
 
         execFile(command, args, (error, stdout, stderr) => {
