@@ -1,0 +1,24 @@
+{
+  "rules": [
+    {
+      "id": "1",
+      "rule": "severity 1 rule",
+      "severity": 1
+    },
+    {
+      "id": "1.1",
+      "rule": "severity 2 rule",
+      "severity": 2
+    },
+    {
+      "id": "2",
+      "rule": "severity 3 rule",
+      "severity": 3
+    },
+    {
+      "id": "2.1",
+      "rule": "severity 4 rule",
+      "severity": 4
+    }
+  ]
+}
