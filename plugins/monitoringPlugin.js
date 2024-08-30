@@ -1,5 +1,7 @@
 const processMessageContent = require('../functions/processMessageContent');
 const { PrismaClient } = require('@prisma/client');
+const dotenv = require('dotenv');
+dotenv.config();
 
 class MonitoringPlugin {
     constructor(container) {
@@ -14,7 +16,15 @@ class MonitoringPlugin {
 
     async init() {
         this.chalk = (await import('chalk')).default;
-        this.prisma = new PrismaClient();
+        this.prisma = new PrismaClient({
+            datasources: {
+                db: {
+                    url: process.env.DATABASE_URL,
+                },
+            },
+            log: ['query', 'info', 'warn', 'error'],
+            errorFormat: 'pretty',
+        });
         this.client.on('messageCreate', this.handleMessageCreate.bind(this));
         this.client.on('messageUpdate', this.handleMessageUpdate.bind(this));
         this.client.on('messageDelete', this.handleMessageDelete.bind(this));
