@@ -99,22 +99,25 @@ class MonitoringPlugin {
                     `${this.chalk.blue('Message edited in')} ${this.chalk.yellow(channel.id === this.CHANNELS.UPDATE_REPORTS.ID ? 'UPDATE REPORTS' : 'BAD CAM REPORTS')} ${this.chalk.blue('by')} ${this.chalk.green(author.username)}: ${this.chalk.gray(oldContent)} -> ${this.chalk.green(newContent)}`
                 );
 
-                const { valid, address, discordEmojiFlag, permalink, date, tagsInput, descriptionInput } = await processMessageContent(false, newContent, channel, author, this.logger, this.chalk);
+                const { valid, address, permalink } = await processMessageContent(false, newContent, channel, author, this.logger, this.chalk);
                 if (!valid) break;
 
-                // Update the data in the database
-                await this.prisma.report.updateMany({
-                    where: { url: oldMessage.content.permalink },
-                    data: {
-                        address: address,
-                        url: permalink,
-                    },
-                });
+                try {
+                    // Update the data in the database
+                    await prisma.report.update({
+                        where: { url: oldMessage.content.permalink },
+                        data: {
+                            address: address,
+                            url: permalink,
+                        },
+                    });
+                } catch (error) {
+                    this.logger.error(`Failed to update report in the database: ${error.message}`);
+                }
                 break;
             }
         }
     }
-
     async handleMessageDelete(message) {
         const { channel, content, author } = message;
 
@@ -125,14 +128,19 @@ class MonitoringPlugin {
                     `${this.chalk.red('Message deleted in')} ${this.chalk.yellow(channel.id === this.CHANNELS.UPDATE_REPORTS.ID ? 'UPDATE REPORTS' : 'BAD CAM REPORTS')} ${this.chalk.red('by')} ${this.chalk.green(author.username)}: ${content}`
                 );
 
-                // Delete the data from the database
-                await this.prisma.report.deleteMany({
-                    where: { url: content.permalink },
-                });
+                try {
+                    // Delete the data from the database
+                    await prisma.report.delete({
+                        where: { url: content.permalink },
+                    });
+                } catch (error) {
+                    this.logger.error(`Failed to delete report from the database: ${error.message}`);
+                }
                 break;
             }
         }
     }
+
 }
 
 module.exports = MonitoringPlugin;
