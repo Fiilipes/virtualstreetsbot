@@ -19,7 +19,7 @@ class MonitoringPlugin {
         this.prisma = new PrismaClient({
             datasources: {
                 db: {
-                    url: process.env.DATABASE_URL,
+                    url: process.env.DATABASE_URL
                 },
             },
             log: ['query', 'info', 'warn', 'error'],
@@ -114,7 +114,7 @@ class MonitoringPlugin {
 
                 try {
                     // Update the data in the database
-                    await prisma.report.update({
+                    await this.prisma.report.update({
                         where: { url: oldMessage.content.permalink },
                         data: {
                             address: address,
@@ -140,7 +140,7 @@ class MonitoringPlugin {
 
                 try {
                     // Delete the data from the database
-                    await prisma.report.delete({
+                    await this.prisma.report.delete({
                         where: { url: content.permalink },
                     });
                 } catch (error) {
