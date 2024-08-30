@@ -1,4 +1,5 @@
 const processMessageContent = require('../functions/processMessageContent');
+const { PrismaClient } = require('@prisma/client');
 
 class MonitoringPlugin {
     constructor(container) {
@@ -6,12 +7,14 @@ class MonitoringPlugin {
         this.logger = container.get('logger');
         this.container = container;
         this.chalk = null;
+        this.prisma = null;
         this.PREFIX = container.get('config').PREFIX;
         this.CHANNELS = container.get('config').CHANNELS;
     }
 
     async init() {
         this.chalk = (await import('chalk')).default;
+        this.prisma = new PrismaClient();
         this.client.on('messageCreate', this.handleMessageCreate.bind(this));
         this.client.on('messageUpdate', this.handleMessageUpdate.bind(this));
         this.client.on('messageDelete', this.handleMessageDelete.bind(this));
@@ -24,40 +27,33 @@ class MonitoringPlugin {
 
         if (Object.values(this.CHANNELS).some(channel => channel.ID === messageChannel.id)) {
             this.logger.info(
-                `${this.chalk.cyan('New message in')} ${this.chalk.yellow(this.monitoredChannelId)} ${this.chalk.cyan('by')} ${this.chalk.green(message.author.username)}: ${message.content}`
+                `${this.chalk.cyan('New message in')} ${this.chalk.yellow(messageChannel.id)} ${this.chalk.cyan('by')} ${this.chalk.green(message.author.username)}: ${message.content}`
             );
         }
 
         // NORMAL MESSAGE
         if (!message.content.startsWith(this.PREFIX)) {
-            console.log(this.CHANNELS)
             switch (message.channel.id) {
-                case this.CHANNELS.UPDATE_REPORTS.ID: {
-                    const { valid, address, discordEmojiFlag, permalink, date, tagsInput, descriptionInput } = await processMessageContent(false,messageContent, messageChannel, messageAuthor,this.logger,this.chalk)
-                    if (!valid) break;
-
-                    // say that you are adding new database data for UPDATE REPORTS
-                    this.logger.info(`${this.chalk.cyan('Adding new database data for')} ${this.chalk.yellow('UPDATE REPORTS')} ${this.chalk.cyan('by')} ${this.chalk.green(message.author.username)}: ${message.content}`);
-                    console.log(address, discordEmojiFlag, permalink, date, tagsInput, descriptionInput)
-                    break;
-                }
+                case this.CHANNELS.UPDATE_REPORTS.ID:
                 case this.CHANNELS.BAD_CAM_REPORTS.ID: {
-                    const { valid, address, discordEmojiFlag, permalink, date, tagsInput, descriptionInput } = await processMessageContent(false,messageContent, messageChannel, messageAuthor,this.logger,this.chalk)
+                    const { valid, address, discordEmojiFlag, permalink, date, tagsInput, descriptionInput } = await processMessageContent(false, messageContent, messageChannel, messageAuthor, this.logger, this.chalk);
                     if (!valid) break;
 
-                    // say that you are adding new database data for BAD CAM REPORTS
-                    this.logger.info(`${this.chalk.cyan('Adding new database data for')} ${this.chalk.yellow('BAD CAM REPORTS')} ${this.chalk.cyan('by')} ${this.chalk.green(message.author.username)}: ${message.content}`);
-                    console.log(address, discordEmojiFlag, permalink, date, tagsInput, descriptionInput)
+                    // Log new database entry
+                    this.logger.info(`${this.chalk.cyan('Adding new database data for')} ${this.chalk.yellow(message.channel.id === this.CHANNELS.UPDATE_REPORTS.ID ? 'UPDATE REPORTS' : 'BAD CAM REPORTS')} ${this.chalk.cyan('by')} ${this.chalk.green(message.author.username)}: ${message.content}`);
+
+                    // Add the data to the database
+                    await this.prisma.report.create({
+                        data: {
+                            address: address,
+                            url: permalink,
+                        },
+                    });
                     break;
                 }
             }
-            if (message.author.bot) {
-
-
-            }
-        }
-        // PREFIX
-        else {
+        } else {
+            // COMMAND HANDLING
             if (message.author.bot) return;
 
             const args = message.content.slice(this.PREFIX.length).trim().split(/\s+/);
@@ -92,21 +88,49 @@ class MonitoringPlugin {
     }
 
     async handleMessageUpdate(newMessage, oldMessage) {
-        if (newMessage.channel.id === this.monitoredChannelId) {
-            const oldContent = oldMessage ? oldMessage.content : '[No cached content]';
-            const newContent = newMessage.content || '[No new content]';
+        const { channel, content: newContent, author } = newMessage;
 
-            this.logger.info(
-                `${this.chalk.blue('Message edited in')} ${this.chalk.yellow(this.monitoredChannelId)} ${this.chalk.blue('by')} ${this.chalk.green(newMessage.author.username)}: ${this.chalk.gray(oldContent)} -> ${this.chalk.green(newContent)}`
-            );
+        switch (channel.id) {
+            case this.CHANNELS.UPDATE_REPORTS.ID:
+            case this.CHANNELS.BAD_CAM_REPORTS.ID: {
+                const oldContent = oldMessage ? oldMessage.content : '[No cached content]';
+
+                this.logger.info(
+                    `${this.chalk.blue('Message edited in')} ${this.chalk.yellow(channel.id === this.CHANNELS.UPDATE_REPORTS.ID ? 'UPDATE REPORTS' : 'BAD CAM REPORTS')} ${this.chalk.blue('by')} ${this.chalk.green(author.username)}: ${this.chalk.gray(oldContent)} -> ${this.chalk.green(newContent)}`
+                );
+
+                const { valid, address, discordEmojiFlag, permalink, date, tagsInput, descriptionInput } = await processMessageContent(false, newContent, channel, author, this.logger, this.chalk);
+                if (!valid) break;
+
+                // Update the data in the database
+                await this.prisma.report.updateMany({
+                    where: { url: oldMessage.content.permalink },
+                    data: {
+                        address: address,
+                        url: permalink,
+                    },
+                });
+                break;
+            }
         }
     }
 
     async handleMessageDelete(message) {
-        if (message.channel.id === this.monitoredChannelId) {
-            this.logger.info(
-                `${this.chalk.red('Message deleted in')} ${this.chalk.yellow(this.monitoredChannelId)} ${this.chalk.red('by')} ${this.chalk.green(message.author.username)}: ${message.content}`
-            );
+        const { channel, content, author } = message;
+
+        switch (channel.id) {
+            case this.CHANNELS.UPDATE_REPORTS.ID:
+            case this.CHANNELS.BAD_CAM_REPORTS.ID: {
+                this.logger.info(
+                    `${this.chalk.red('Message deleted in')} ${this.chalk.yellow(channel.id === this.CHANNELS.UPDATE_REPORTS.ID ? 'UPDATE REPORTS' : 'BAD CAM REPORTS')} ${this.chalk.red('by')} ${this.chalk.green(author.username)}: ${content}`
+                );
+
+                // Delete the data from the database
+                await this.prisma.report.deleteMany({
+                    where: { url: content.permalink },
+                });
+                break;
+            }
         }
     }
 }
