@@ -16,7 +16,6 @@ class CommandHandlerPlugin {
         this.chalk = (await import('chalk')).default;  // Dynamically import chalk
         await Promise.all([
             this.loadCommands('userInteraction/commands', 'CHAT_INPUT'),
-            this.loadCommands('userInteraction/userApplications', 'USER'),
             this.loadCommands('userInteraction/messageApplications', 'MESSAGE'),
         ]);
 
