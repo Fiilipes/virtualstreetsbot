@@ -1,24 +1,21 @@
 const { execFile } = require('child_process');
 
-module.exports = (lat, lng) => {
-    return new Promise((resolve, reject) => {
-        const isHosting = process.env.HOSTING_ENABLED === 'true'; // Set this environment variable on your hosting
-        const command = isHosting ?
-                process.env.PYTHON_PATH : 'C:\\Users\\jarol\\PycharmProjects\\streetlevelproject\\.venv\\Scripts\\python.exe';
-        const args = ['functions/find_panorama.py', lat, lng];
+module.exports = (lat, lng, heading, pitch, fov) => {
+  return new Promise((resolve, reject) => {
+    const command = process.env.PYTHON_PATH;
+    const args = ['functions/find_panorama.py', lat, lng, heading, pitch, fov];
 
-        execFile(command, args, (error, stdout, stderr) => {
-            if (error || stderr) {
-                return reject(`Error: ${error || stderr}`);
-            }
+    execFile(command, args, (error, stdout, stderr) => {
+      if (error || stderr) {
+        return reject(`Error: ${error || stderr}`);
+      }
 
-            try {
-                const latestPano = JSON.parse(stdout.trim());
-                console.log(latestPano);
-                resolve(latestPano);
-            } catch (parseError) {
-                reject(`Error parsing JSON: ${parseError}`);
-            }
-        });
+      try {
+        const latestPano = JSON.parse(stdout.trim());
+        resolve(latestPano);
+      } catch (parseError) {
+        reject(`Error parsing JSON: ${parseError}`);
+      }
     });
+  });
 };

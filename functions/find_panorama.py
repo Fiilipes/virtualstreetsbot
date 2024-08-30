@@ -11,7 +11,7 @@ def find_latest_panorama(panoramas):
     return latest_pano
 
 def main():
-    lat, lng = map(float, sys.argv[1:3])
+    lat, lng, heading, pitch, fov = map(float, sys.argv[1:6])
     pano = streetview.find_panorama(lat, lng, search_third_party=False)
 
     if not pano.historical:
@@ -21,9 +21,8 @@ def main():
         if latest_pano and (datetime.strptime(str(pano.date), "%Y-%m") > datetime.strptime(str(latest_pano.date), "%Y-%m")):
             latest_pano = pano
 
-
     pano_data = {
-        "permalink": latest_pano.permalink().replace("!2e2", "!2e0").replace("!2e1", "!2e0").replace("!2e3", "!2e0").replace("!2e4", "!2e0").replace("!2e5", "!2e0").replace("!2e6", "!2e0").replace("!2e7", "!2e0").replace("!2e8", "!2e0").replace("!2e9", "!2e0"),
+        "permalink": latest_pano.permalink(heading, pitch, fov).replace("!2e2", "!2e0").replace("!2e1", "!2e0").replace("!2e3", "!2e0").replace("!2e4", "!2e0").replace("!2e5", "!2e0").replace("!2e6", "!2e0").replace("!2e7", "!2e0").replace("!2e8", "!2e0").replace("!2e9", "!2e0"),
         "date": str(latest_pano.date)
     } if latest_pano else None
 
