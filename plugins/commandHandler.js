@@ -10,6 +10,7 @@ class CommandHandlerPlugin {
         this.client.userApplications = new Map();
         this.client.messageApplications = new Map();
         this.chalk = null;
+        this.container = container;
     }
 
     async init() {
@@ -83,11 +84,16 @@ class CommandHandlerPlugin {
 
         if (command) {
             try {
-                await command.run(this.client, interaction);
+                await command.run({
+                    client: this.client,
+                    container: this.container,
+                    interaction: interaction,
+                });
             } catch (error) {
                 this.logger.error(
                     `${this.chalk.red('Error executing command')} ${this.chalk.yellow(commandName)}: ${error.message}`
                 );
+                console.log(error)
                 console.error(error.stack);
             }
         }

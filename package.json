@@ -1,31 +1,47 @@
 {
   "name": "virtualstreets-helper",
   "version": "1.0.0",
-  "description": "",
+  "description": "A helper bot for Virtual Streets Discord server.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint . --ext .js,.mjs,.cjs,.ts,.tsx",
     "format": "prettier --write .",
-    "start": "node index.js"
+    "start": "node index.js",
+    "build": "echo \"Build script not defined\" && exit 1"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/VirtualStreets/Helper-Discord"
   },
+  "author": "VirtualStreets Developer Team",
+  "license": "MIT",
+  "keywords": [
+    "discord",
+    "bot",
+    "helper",
+    "virtualstreets",
+    "virtual",
+    "streets"
+  ],
+  "bugs": {
+    "url": "https://github.com/VirtualStreets/Helper-Discord/issues"
+  },
+  "homepage": "https://github.com/VirtualStreets/Helper-Discord#readme",
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "dependencies": {
-    "@prisma/client": "^5.18.0",
     "axios": "^1.7.2",
     "canvas": "^2.11.2",
     "chalk": "^5.3.0",
     "dotenv": "^16.4.5",
     "eris": "github:abalabahaha/eris#dev",
+    "firebase": "^10.13.1",
     "fs": "^0.0.1-security",
-    "mongodb": "^6.8.0",
     "node-fetch": "^3.3.2",
     "pino": "^9.3.2",
     "pino-pretty": "^11.2.2",
-    "prisma": "^5.18.0",
     "quick-lru": "^7.0.0",
     "svg-path-bounding-box": "^1.0.4",
     "xml2js": "^0.6.2"

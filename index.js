@@ -48,7 +48,7 @@ client.commandCache = new Map();
 
   client.on('ready', async () => {
     client.editStatus('online', {
-      name: `VirtualStreets.org`,
+      name: `Coverage reports`,
       type: Eris.Constants.ActivityTypes.LISTENING,
     });
     logger.info('Bot is ready.');
@@ -59,10 +59,8 @@ client.commandCache = new Map();
     logger.info('Plugins initialized.');
   });
 
-  // Handle warnings and errors
   client.on('warn', (message) => logger.warn(`${chalk.yellow('Rate limit warning:')} ${message}`));
 
-  // Graceful Shutdown
   process.on('SIGINT', shutdown);
   process.on('SIGTERM', shutdown);
   process.on('unhandledRejection', (reason, promise) => {

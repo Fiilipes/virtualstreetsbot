@@ -4,6 +4,7 @@ module.exports = async (messageContent) => {
   const urlMatch = messageContent.match(urlRegex);
 
   if (!urlMatch) {
+    console.log(messageContent);
     console.log('Invalid or missing URL.');
     return;
   }
