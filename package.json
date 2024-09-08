@@ -7,29 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint . --ext .js,.mjs,.cjs,.ts,.tsx",
     "format": "prettier --write .",
-    "start": "node index.js",
-    "build": "echo \"Build script not defined\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/VirtualStreets/Helper-Discord"
-  },
-  "author": "VirtualStreets Developer Team",
-  "license": "MIT",
-  "keywords": [
-    "discord",
-    "bot",
-    "helper",
-    "virtualstreets",
-    "virtual",
-    "streets"
-  ],
-  "bugs": {
-    "url": "https://github.com/VirtualStreets/Helper-Discord/issues"
-  },
-  "homepage": "https://github.com/VirtualStreets/Helper-Discord#readme",
-  "engines": {
-    "node": ">=14.0.0"
+    "start": "node index.js"
   },
   "dependencies": {
     "axios": "^1.7.2",
