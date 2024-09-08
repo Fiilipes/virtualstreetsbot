@@ -1,0 +1,1 @@
+// Tady přijde timeout command z předešlého GO bota
